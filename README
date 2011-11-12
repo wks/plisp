@@ -1,0 +1,117 @@
+plisp -- Python LISP
+====================
+
+This is a proof-of-concept implementation of a LISP dialect in Python.
+
+There is no LISP parser included. Python's native data structures are used
+as Symbolic Expressions in LISP. A typical plisp expression looks like:
+
+    ["+", ["*", 3, 4], ['*', 5, 6]]  
+
+In plisp, a Python str object is considered as a symbol in LISP and a Python
+list object is considered a list in LISP. Any other Python objects are
+considered LISP atoms. Therefore this interpreter (plisp.py) merely reads
+a plisp expression (which is just a Python object) and execute (evaluate)
+it.
+
+Files
+=====
+
+plisp.py is the plisp interpreter.
+test.py includes test cases.
+progs includes some sample programs written in plisp.
+
+The Language
+============
+
+- A Python str is a LISP symbol. It evaluates to the value in the current
+  "context" (a dictionary) with this symbol as its key.
+
+  Example: 'foo' -> the value looked up in the "context" by key 'foo'
+
+- A Python list is a LISP list. The first element in the list is evaluated
+  first and is expected to evaluate to a plisp function (a Python callable
+  object called with an additional "context" parameter). If this function
+  should be called by value, then each of the rest elements are evaluated.
+  Otherwise if this function is called by name, the rest elements are left
+  as is. Finally this function is called with the rest elements as
+  arguments.
+
+  Example: ['+', 1, 2] ->
+    1. Look up '+' in the context and find the function for adding.
+    2. Since '+' is called by value, evaluate 1 and 2, which evaluate to
+       1 and 2 themselves.
+    3. Apply 1 and 2 to this function and the return value is 3.
+
+- All other python values evaluate to themselves.
+  
+  Example: 42 -> 42
+
+Available functions:
+- eval:   Evaluate its argument.
+- quote:  (by name) Quote an expression.
+- set:    Put a value into the "context".
+- setq:   (by name) Same as set, except the symbol name is automatically
+          quoted.
+- let:    (by name) Evaluate an expression with local variables.
+- lambda: (by name) Define a function.
+
+- print:  Print its argument.
+- read:   Read an expression from the standard input.
+
+- begin:   (by name) Evaluate multiple expressions sequentially.
+- dowhile: (by name) Evaluate its arguments repeatedly until the last
+           expression evaluate to False.
+- loop:    (by name) Evaluate its arguments repeatedly forever.
+
+- if:   (by name) Conditional expression. If the first argument evaluates to
+        True, then the second argument is evaluated. Otherwise the third
+        argument is evaluated.
+- cond: (by name) Conditional expression. Each element should be a pair of
+        (test, value). The first value with its test evaluates to True is
+        returned.
+
+- '+': Add.
+- '-': Subtract.
+- '*': Multiply.
+- '/': Divide.
+- '%': Remainder.
+
+- '==': Equals.
+- '!=': Does not equal.
+- '<':  Less than.
+- '>':  Greater than.
+- '<=': Less than or equal to.
+- '>=': Greater than or equal to.
+
+- and: Logical and.
+- or:  Logical or.
+- not: Logical not.
+
+- filter: Like Python filter. Apply a function to a list and keep the
+          elements which return True.
+- map:    Like Python map. Apply a function to a list and return all return
+          values.
+- reduce: Like Python reduce. Replace the first two elements of a list with
+          the return value of a binary function until the list contains only
+          one element.
+- partition: Like filter, but returns two lists. One is all elements
+             returning True and the other is all elements returning False.
+
+- apply: Call a function with a list as its arguments.
+- list:  Evaluate each arguments and return a list of all return values.
+- cons:  Prepend an element to a list.
+- first: Return the first element of a list.
+- car:   Alias to first.
+- head:  Alias to first.
+- rest:  Return the list excluding the first element.
+- cdr:   Alias to rest.
+- tail:  Alias to rest.
+- null:  Return True if the argument is an emply list [].
+- concat: Concatenate a list of lists.
+- append: Concatenate all arguments, which all are supposed to be lists.
+
+Author
+======
+
+Kunshan Wang <wks1986@gmail.com>
